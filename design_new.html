@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Anniversary!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-blue': '#bfdbfe',
+                        'deep-blue': '#3b82f6',
+                        'paper': '#f8fafc',
+                    },
+                    fontFamily: {
+                        'hand': ['"Dancing Script"', 'cursive'],
+                        'body': ['"Nunito"', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pop-in': 'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                        'fade-up': 'fadeUp 0.8s ease-out forwards',
+                        'spin-slow': 'spin 8s linear infinite',
+                        'wiggle': 'wiggle 1s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        popIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.8)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        },
+                        fadeUp: {
+                            '0%': { opacity: '0', transform: 'translateY(40px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        wiggle: {
+                            '0%, 100%': { transform: 'rotate(-3deg)' },
+                            '50%': { transform: 'rotate(3deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Simplified Envelope Styles */
+        .envelope-container {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-top: 60px;
+        }
+        .envelope-container:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope-pocket {
+            z-index: 20;
+        }
+
+        .envelope-back {
+            z-index: 5;
+        }
+        
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 110px solid #60a5fa;
+            z-index: 50;
+            transform-origin: top;
+            transition: transform 0.4s ease, z-index 0.2s;
+        }
+        
+        .envelope-container:hover .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+        
+        .letter-preview {
+            z-index: 10;
+        }
+
+        /* SPA Utilities */
+        .page-section {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .page-section.active {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .nav-link.active-link {
+            color: #3b82f6;
+            font-weight: 700;
+        }
+
+        /* Gallery Animations */
+        .gallery-card {
+            opacity: 0;
+        }
+        
+        .photo-modal-open {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        
+        .photo-modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease-out;
+        }
+        
+        .photo-modal-open .photo-modal-content {
+            transform: scale(1);
+        }
+
+        /* --- PARTICLE ANIMATIONS --- */
+        .flower-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 70;
+        }
+
+        .animate-confetti {
+            animation: explode 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 1; }
+            80% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(var(--rot)); opacity: 0; }
+        }
+
+        .animate-fall {
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+        
+        /* Music Player Styles */
+        .music-player-container {
+            z-index: 100;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        
+        .music-disc {
+            animation-play-state: paused;
+        }
+        .playing .music-disc {
+            animation-play-state: running;
+        }
+
+        /* SLIDER GAME STYLES */
+        .slider-track {
+            position: relative;
+            width: 100%;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #bfdbfe;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slider-text {
+            color: #9ca3af;
+            font-size: 1.1rem;
+            font-weight: 600;
+            animation: pulse-slow 2s infinite;
+            user-select: none;
+            letter-spacing: 1px;
+        }
+        
+        .slider-handle {
+            position: absolute;
+            left: 4px;
+            width: 62px;
+            height: 62px;
+            background: #3b82f6;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            touch-action: none; /* CRITICAL for mobile drag */
+            z-index: 20;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.05s linear;
+        }
+        
+        .slider-handle:active {
+            cursor: grabbing;
+            transform: scale(0.95);
+        }
+
+        .slider-target {
+            position: absolute;
+            right: 4px;
+            width: 62px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ec4899;
+            z-index: 10;
+        }
+
+        /* Success Animation for Slider */
+        .slider-success .slider-handle {
+            transition: left 0.3s ease-in;
+            left: calc(100% - 66px) !important;
+            background: #ec4899;
+        }
+        
+        .slider-success .slider-track {
+            border-color: #ec4899;
+        }
+        
+        .slider-success .slider-text {
+            opacity: 0;
+        }
+
+    </style>
+</head>
+<body class="bg-blue-50 text-gray-700 font-body min-h-screen flex flex-col overflow-hidden">
+
+    <!-- HIDDEN SVG DEFINITIONS -->
+    <svg style="display: none;">
+        <symbol id="gerbera-flower" viewBox="0 0 100 100">
+             <g transform="translate(50,50)">
+                <g class="flower-color-back" fill="currentColor" stroke="rgba(0,0,0,0.1)" stroke-width="0.5">
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(0)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(22.5)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(45)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(67.5)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(90)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(112.5)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(135)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(157.5)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(180)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(202.5)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(225)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(247.5)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(270)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(292.5)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(315)" />
+                    <ellipse cx="0" cy="-35" rx="4" ry="30" transform="rotate(337.5)" />
+                </g>
+                <g fill="white" stroke="rgba(0,0,0,0.05)" stroke-width="0.5" transform="rotate(11.25) scale(0.9)">
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(0)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(22.5)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(45)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(67.5)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(90)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(112.5)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(135)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(157.5)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(180)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(202.5)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(225)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(247.5)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(270)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(292.5)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(315)" />
+                    <ellipse cx="0" cy="-35" rx="3.5" ry="28" transform="rotate(337.5)" />
+                </g>
+                <circle cx="0" cy="0" r="8" fill="#fde047" /> 
+                <circle cx="0" cy="0" r="4" fill="#374151" />
+            </g>
+        </symbol>
+    </svg>
+
+    <!-- Background Decoration -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
+        <div class="absolute top-0 left-0 w-64 h-64 bg-blue-200 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-blue-200 rounded-full blur-3xl translate-x-1/3 translate-y-1/3"></div>
+    </div>
+
+    <!-- Navigation (Initially Hidden) -->
+    <nav id="main-nav" class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md shadow-sm hidden opacity-0 transition-opacity duration-700">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="font-hand text-2xl text-deep-blue font-bold">Us ❤️</div>
+            <div class="flex gap-6 md:gap-8">
+                <button onclick="switchTab('home')" id="nav-home" class="nav-link active-link text-gray-600 hover:text-deep-blue transition-colors">Home</button>
+                <button onclick="switchTab('letters')" id="nav-letters" class="nav-link text-gray-600 hover:text-deep-blue transition-colors">Letters</button>
+                <button onclick="switchTab('gallery')" id="nav-gallery" class="nav-link text-gray-600 hover:text-deep-blue transition-colors">Gallery</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="relative z-10 flex-grow w-full max-w-5xl mx-auto pt-20">
+        
+        <!-- PAGE 0: NEW SLIDER GAME -->
+        <section id="intro-game" class="page-section active flex-col items-center justify-center min-h-[90vh] absolute inset-0 bg-blue-50 z-40 px-4">
+            <div class="text-center z-10 p-6 max-w-sm w-full">
+                <h1 class="font-hand text-5xl md:text-6xl text-deep-blue mb-2 animate-float">Hey You!</h1>
+                <p class="text-lg text-gray-600 mb-10">Slide to deliver my love ❤️</p>
+                
+                <!-- The Slider Game -->
+                <div id="slider-container" class="w-full max-w-[320px] mx-auto relative">
+                    <div id="slider-track" class="slider-track">
+                        <span id="slider-text" class="slider-text">Slide to open >></span>
+                    </div>
+                    
+                    <!-- The Draggable Handle (Letter) -->
+                    <div id="slider-handle" class="slider-handle">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    </div>
+                    
+                    <!-- The Target (Heart) -->
+                    <div id="slider-target" class="slider-target">
+                        <svg class="w-10 h-10 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGE 1: HOME (Hero Only) -->
+        <section id="home-view" class="page-section flex-col items-center justify-center min-h-[80vh]">
+            <div id="hero-content" class="text-center">
+                <h1 class="font-hand text-6xl md:text-8xl text-deep-blue mb-6 animate-float">Happy Anniversary</h1>
+                <p class="text-xl md:text-2xl text-gray-500 mb-8 max-w-lg mx-auto px-4">
+                    To my favorite person. I have a surprise for you.
+                </p>
+                <button onclick="switchTab('letters')" class="bg-white text-deep-blue font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl hover:bg-blue-50 transition-all transform hover:-translate-y-1 border border-blue-100 flex items-center gap-2 mx-auto">
+                    <span>Open Surprise</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- PAGE 2: LETTERS (Envelope Only) -->
+        <section id="letters-view" class="page-section flex-col items-center justify-center min-h-[70vh] py-10 px-4">
+            <div class="text-center">
+                <h2 class="font-hand text-4xl text-deep-blue mb-12">For My Qtie</h2>
+                <div id="envelope-trigger" onclick="openModal()" class="envelope-container w-[320px] h-[220px] relative mx-auto drop-shadow-xl hover:drop-shadow-2xl">
+                    <div class="envelope-back absolute inset-0 bg-blue-800 rounded-lg shadow-xl"></div>
+                    <div class="envelope-flap"></div>
+                    <div class="letter-preview absolute left-4 right-4 top-6 bottom-4 bg-white rounded shadow-sm transition-transform duration-300 group-hover:-translate-y-2"></div>
+                    <div class="envelope-pocket absolute inset-0 pointer-events-none">
+                         <svg class="w-full h-full" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M0 0L160 110L0 220V0Z" fill="#3b82f6"/>
+                            <path d="M320 0L160 110L320 220V0Z" fill="#2563eb"/>
+                            <path d="M0 220L160 100L320 220H0Z" fill="#60a5fa"/>
+                            <path d="M160 100 L0 220 H320 L160 100Z" fill="black" fill-opacity="0.05"/>
+                         </svg>
+                    </div>
+                </div>
+                <p class="mt-8 text-gray-400 text-sm animate-bounce">Click to read</p>
+            </div>
+        </section>
+
+        <!-- PAGE 3: GALLERY -->
+        <section id="gallery-view" class="page-section flex-col items-center py-10 px-4">
+            <h2 class="font-hand text-5xl text-center text-deep-blue mb-12">Our Memories</h2>
+            <div class="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 w-full">
+                <!-- Memory Card 1 -->
+                <div onclick="openPhotoModal('https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1000&auto=format&fit=crop', 'The beginning')" 
+                     class="break-inside-avoid bg-white p-2 rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 gallery-card animate-fade-up cursor-pointer" style="animation-delay: 0.1s">
+                    <div class="aspect-[4/5] bg-gray-200 rounded-lg overflow-hidden relative group">
+                        <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=1000&auto=format&fit=crop" 
+                             alt="Couple" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-2">
+                    </div>
+                    <p class="font-hand text-2xl text-center mt-3 text-gray-600">The beginning</p>
+                </div>
+                <!-- Memory Card 2 -->
+                <div onclick="openPhotoModal('https://images.unsplash.com/photo-1522673607200-1645062cd958?q=80&w=1000&auto=format&fit=crop', 'Funny moments')" 
+                     class="break-inside-avoid bg-white p-2 rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 gallery-card animate-fade-up cursor-pointer" style="animation-delay: 0.2s">
+                    <div class="aspect-square bg-gray-200 rounded-lg overflow-hidden relative group">
+                         <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                         </div>
+                         <img src="https://images.unsplash.com/photo-1522673607200-1645062cd958?q=80&w=1000&auto=format&fit=crop" 
+                              alt="Couple" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-2">
+                    </div>
+                    <p class="font-hand text-2xl text-center mt-3 text-gray-600">Funny moments</p>
+                </div>
+                <!-- Memory Card 3 -->
+                <div onclick="openPhotoModal('https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1000&auto=format&fit=crop', 'Travels')" 
+                     class="break-inside-avoid bg-white p-2 rounded-xl shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 gallery-card animate-fade-up cursor-pointer" style="animation-delay: 0.3s">
+                    <div class="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden relative group">
+                         <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                         </div>
+                         <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=1000&auto=format&fit=crop" 
+                              alt="Couple" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 group-hover:rotate-1">
+                    </div>
+                    <p class="font-hand text-2xl text-center mt-3 text-gray-600">Travels</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- THE LETTER MODAL -->
+    <div id="letter-modal" class="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div id="modal-content" class="bg-white w-[90%] max-w-lg p-8 rounded-lg shadow-2xl relative transform scale-90 transition-transform duration-300">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="text-center">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h2 class="font-hand text-3xl text-deep-blue mb-4">My Dearest,</h2>
+                <div class="prose prose-blue mx-auto text-gray-600 leading-relaxed max-h-[60vh] overflow-y-auto">
+                    <p class="mb-4">Every day with you is a gift that I cherish. Thank you for the laughter, the love, and the beautiful memories we've built together.</p>
+                    <p class="mb-4">I love you more than words can say. Here is to many more years of happiness!</p>
+                </div>
+                <p class="font-hand text-xl mt-6 text-gray-400">- Yours Forever</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHOTO MODAL -->
+    <div id="photo-modal" class="fixed inset-0 z-[80] flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md" onclick="closePhotoModal()"></div>
+        <div class="photo-modal-content relative z-10 w-full max-w-5xl h-full max-h-screen p-4 flex flex-col items-center justify-center">
+            <button onclick="closePhotoModal()" class="absolute top-4 right-4 md:top-8 md:right-8 text-white/70 hover:text-white transition-colors z-50 p-2">
+                <svg class="w-8 h-8 md:w-10 md:h-10 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="relative w-full h-full flex items-center justify-center">
+                <img id="modal-image" src="" alt="Memory" class="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl">
+            </div>
+            <p id="modal-caption" class="font-hand text-3xl md:text-4xl text-white text-center mt-4 drop-shadow-md"></p>
+        </div>
+    </div>
+
+    <!-- MUSIC PLAYER & FLOATING BTN -->
+    <audio id="bg-music" loop>
+        <source src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Gymnopedie_No_1.ogg" type="audio/ogg">
+    </audio>
+
+    <button id="music-fab" onclick="toggleMusicPlayer()" class="fixed bottom-6 right-6 z-[90] w-14 h-14 bg-white rounded-full shadow-lg border border-blue-100 flex items-center justify-center text-blue-500 hover:scale-110 hover:shadow-xl transition-all duration-300 group hidden opacity-0">
+        <div class="absolute inset-0 bg-blue-50 rounded-full animate-ping opacity-20 group-hover:opacity-40"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+    </button>
+
+    <div id="music-player" class="fixed bottom-24 right-6 z-[90] w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-blue-100 p-4 transform translate-y-10 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="flex items-center gap-4">
+            <div id="music-disc" class="music-disc w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden border-2 border-blue-100 relative shadow-inner animate-spin-slow">
+                <div class="absolute inset-0 bg-gradient-to-tr from-blue-200 to-blue-50"></div>
+                <div class="w-4 h-4 bg-white rounded-full z-10 border border-gray-100"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h4 id="song-title" class="font-bold text-gray-700 text-sm truncate">Gymnopedie No.1</h4>
+                <p id="song-artist" class="text-xs text-gray-500 truncate">Erik Satie</p>
+            </div>
+        </div>
+        <div class="flex items-center justify-center gap-4 mt-3">
+            <button onclick="prevSong()" class="text-gray-400 hover:text-blue-500 transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button onclick="togglePlay()" id="play-btn" class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white hover:bg-blue-600 shadow-md transition-colors">
+                <svg id="icon-play" class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <svg id="icon-pause" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button onclick="nextSong()" class="text-gray-400 hover:text-blue-500 transition-colors">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // --- SLIDER GAME LOGIC ---
+        function initSliderGame() {
+            const handle = document.getElementById('slider-handle');
+            const track = document.getElementById('slider-track');
+            const container = document.getElementById('slider-container');
+            const trackWidth = track.offsetWidth;
+            const handleWidth = handle.offsetWidth;
+            const maxDrag = trackWidth - handleWidth - 8; // 8px padding approx
+            
+            let isDragging = false;
+            let startX = 0;
+            let currentX = 0;
+            
+            function handleStart(clientX) {
+                isDragging = true;
+                startX = clientX - currentX;
+                handle.style.transition = 'none'; // Disable transition for direct follow
+            }
+            
+            function handleMove(clientX) {
+                if (!isDragging) return;
+                
+                let x = clientX - startX;
+                
+                // Clamp
+                if (x < 0) x = 0;
+                if (x > maxDrag) x = maxDrag;
+                
+                currentX = x;
+                handle.style.transform = `translateX(${x}px)`;
+                
+                // Opacity of text based on progress
+                const opacity = 1 - (x / maxDrag);
+                document.getElementById('slider-text').style.opacity = opacity;
+            }
+            
+            function handleEnd() {
+                if (!isDragging) return;
+                isDragging = false;
+                handle.style.transition = 'transform 0.3s ease-out';
+                
+                // Check if reached end (90% threshold)
+                if (currentX > maxDrag * 0.9) {
+                    // Success!
+                    currentX = maxDrag;
+                    handle.style.transform = `translateX(${maxDrag}px)`;
+                    container.classList.add('slider-success');
+                    
+                    // Trigger site entry logic
+                    setTimeout(enterSite, 500);
+                } else {
+                    // Reset
+                    currentX = 0;
+                    handle.style.transform = `translateX(0px)`;
+                    document.getElementById('slider-text').style.opacity = 1;
+                }
+            }
+            
+            // Mouse Events
+            handle.addEventListener('mousedown', e => {
+                handleStart(e.clientX);
+                e.preventDefault(); // Prevent text selection
+            });
+            
+            window.addEventListener('mousemove', e => handleMove(e.clientX));
+            window.addEventListener('mouseup', handleEnd);
+            
+            // Touch Events (Passive false for preventing scroll)
+            handle.addEventListener('touchstart', e => {
+                handleStart(e.touches[0].clientX);
+            }, { passive: false });
+            
+            window.addEventListener('touchmove', e => {
+                handleMove(e.touches[0].clientX);
+            }, { passive: false });
+            
+            window.addEventListener('touchend', handleEnd);
+        }
+
+        function enterSite() {
+            // Success animation confetti
+            createConfetti();
+            
+            // 1. Hide Game
+            const intro = document.getElementById('intro-game');
+            intro.style.opacity = '0';
+            setTimeout(() => {
+                intro.style.display = 'none';
+            }, 800);
+
+            // 2. Show Home
+            const home = document.getElementById('home-view');
+            home.style.display = 'flex';
+            setTimeout(() => {
+                home.classList.add('active');
+            }, 50);
+
+            // 3. Show Nav & Music Button
+            document.getElementById('main-nav').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('main-nav').classList.remove('opacity-0');
+                document.getElementById('music-fab').classList.remove('hidden', 'opacity-0');
+            }, 100);
+
+            // 4. Play Music
+            playMusic();
+        }
+
+        // Initialize Game logic
+        initSliderGame();
+
+
+        // --- MUSIC PLAYER & NAV LOGIC ---
+        const songs = [
+            { title: "Gymnopedie No. 1", artist: "Erik Satie", url: "https://upload.wikimedia.org/wikipedia/commons/e/eb/Gymnopedie_No_1.ogg" },
+            { title: "Clair de Lune", artist: "Claude Debussy", url: "https://upload.wikimedia.org/wikipedia/commons/2/23/Debussy_-_Clair_de_Lune.ogg" },
+            { title: "Liebestraum No. 3", artist: "Franz Liszt", url: "https://upload.wikimedia.org/wikipedia/commons/c/c4/Franz_Liszt_-_Liebestraum_No_3.ogg" }
+        ];
+        
+        let currentSongIndex = 0;
+        const audio = document.getElementById('bg-music');
+        const playBtn = document.getElementById('play-btn');
+        const iconPlay = document.getElementById('icon-play');
+        const iconPause = document.getElementById('icon-pause');
+        const musicDisc = document.getElementById('music-disc');
+        const playerPopup = document.getElementById('music-player');
+        let isPlayerVisible = false;
+
+        function toggleMusicPlayer() {
+            isPlayerVisible = !isPlayerVisible;
+            if (isPlayerVisible) {
+                playerPopup.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
+            } else {
+                playerPopup.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
+            }
+        }
+
+        function playMusic() {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => updatePlayUI(true)).catch(error => console.log("Autoplay prevented"));
+            }
+        }
+
+        function pauseMusic() {
+            audio.pause();
+            updatePlayUI(false);
+        }
+
+        function togglePlay() {
+            if (audio.paused) playMusic();
+            else pauseMusic();
+        }
+
+        function updatePlayUI(isPlaying) {
+            if (isPlaying) {
+                iconPlay.classList.add('hidden');
+                iconPause.classList.remove('hidden');
+                musicDisc.parentElement.parentElement.classList.add('playing');
+            } else {
+                iconPlay.classList.remove('hidden');
+                iconPause.classList.add('hidden');
+                musicDisc.parentElement.parentElement.classList.remove('playing');
+            }
+        }
+
+        function loadSong(index) {
+            const song = songs[index];
+            document.getElementById('song-title').textContent = song.title;
+            document.getElementById('song-artist').textContent = song.artist;
+            audio.src = song.url;
+        }
+
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            loadSong(currentSongIndex);
+            playMusic();
+        }
+
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong(currentSongIndex);
+            playMusic();
+        }
+
+        loadSong(0);
+
+        function switchTab(tabId) {
+            if (audio.paused) playMusic(); // Ensure music plays on nav
+            
+            document.querySelectorAll('.page-section').forEach(section => {
+                if(section.id !== 'intro-game') { // Don't mess with game if it's somehow active
+                    section.classList.remove('active');
+                    setTimeout(() => {
+                        if(!section.classList.contains('active')) section.style.display = 'none';
+                    }, 500);
+                }
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active-link'));
+
+            const target = document.getElementById(tabId + '-view');
+            const nav = document.getElementById('nav-' + tabId);
+            
+            target.style.display = 'flex';
+            setTimeout(() => target.classList.add('active'), 50);
+            nav.classList.add('active-link');
+
+            if(tabId !== 'home') document.body.style.overflowY = 'auto';
+        }
+
+        // --- PARTICLE EFFECTS ---
+        function createConfetti() {
+            // Find center of screen if game trigger, or envelope trigger if later
+            let originX = window.innerWidth / 2;
+            let originY = window.innerHeight / 2;
+            
+            const envelope = document.getElementById('envelope-trigger');
+            if(envelope && envelope.offsetParent !== null) {
+                const rect = envelope.getBoundingClientRect();
+                originX = rect.left + rect.width / 2;
+                originY = rect.top + rect.height / 2;
+            }
+
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('flower-particle', 'animate-confetti');
+                const isBlue = Math.random() > 0.5;
+                const color = isBlue ? '#93c5fd' : '#ffffff';
+                const size = Math.random() * 20 + 20;
+                particle.innerHTML = `<svg class="w-full h-full" style="color: ${color}"><use href="#gerbera-flower"></use></svg>`;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${originX}px`;
+                particle.style.top = `${originY}px`;
+                
+                const tx = (Math.random() - 0.5) * 600; 
+                const ty = (Math.random() - 0.7) * 600; 
+                const rot = Math.random() * 720;
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                particle.style.setProperty('--rot', `${rot}deg`);
+
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1500);
+            }
+        }
+
+        function createFallingFlowers() {
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.classList.add('flower-particle', 'animate-fall');
+                    const isBlue = Math.random() > 0.5;
+                    const color = isBlue ? '#93c5fd' : '#ffffff';
+                    const size = Math.random() * 30 + 15;
+                    particle.innerHTML = `<svg class="w-full h-full" style="color: ${color}"><use href="#gerbera-flower"></use></svg>`;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${Math.random() * window.innerWidth}px`;
+                    particle.style.top = `-50px`;
+                    const fallDuration = Math.random() * 3 + 2; 
+                    particle.style.animationDuration = `${fallDuration}s`;
+
+                    document.body.appendChild(particle);
+                    setTimeout(() => particle.remove(), fallDuration * 1000);
+                }, i * 200);
+            }
+        }
+
+        // --- MODAL LOGIC ---
+        function openModal() {
+            createConfetti();
+            createFallingFlowers();
+            setTimeout(() => {
+                const modal = document.getElementById('letter-modal');
+                const content = document.getElementById('modal-content');
+                modal.classList.remove('pointer-events-none', 'opacity-0');
+                content.classList.remove('scale-90');
+                content.classList.add('animate-pop-in');
+            }, 600); 
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('letter-modal');
+            const content = document.getElementById('modal-content');
+            modal.classList.add('pointer-events-none', 'opacity-0');
+            content.classList.add('scale-90');
+            content.classList.remove('animate-pop-in');
+        }
+
+        function openPhotoModal(imgSrc, caption) {
+            const modal = document.getElementById('photo-modal');
+            const imgElement = document.getElementById('modal-image');
+            const captionElement = document.getElementById('modal-caption');
+            imgElement.src = imgSrc;
+            captionElement.textContent = caption;
+            modal.classList.add('photo-modal-open');
+        }
+
+        function closePhotoModal() {
+            const modal = document.getElementById('photo-modal');
+            modal.classList.remove('photo-modal-open');
+        }
+    </script>
+</body>
+</html>
